@@ -1,0 +1,2 @@
+# Project Details
+The project aims to read employee data from both an API and a CSV file, and then store it into a database table. A controller is available that accepts an employee endpoint and an employee CSV file path.

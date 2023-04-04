@@ -1,19 +1,23 @@
 package com.example.datamigrator.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
 @Entity
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class Employee {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(name = "firstname")
-    @JsonProperty("employee_name")
     private String firstName;
     @Column(name = "lastname")
     private String lastName;
@@ -22,7 +26,6 @@ public class Employee {
     @Column(name = "phone")
     private String phone;
     @Column(name = "salary")
-    @JsonProperty("employee_salary")
     private Double salary;
 
 }

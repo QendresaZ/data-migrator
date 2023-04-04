@@ -1,38 +1,47 @@
 package com.example.datamigrator.service;
 
-import com.example.datamigrator.model.Employee;
+import com.example.datamigrator.dto.EmployeeCsvDto;
+import com.example.datamigrator.dto.EmployeeRest;
+import com.example.datamigrator.dto.SaveEmployeesRequest;
+import com.example.datamigrator.mapper.EmployeeMapper;
 import com.example.datamigrator.repository.EmployeeRepository;
-import com.opencsv.CSVReader;
-import com.opencsv.CSVReaderBuilder;
+import com.example.datamigrator.rest.EmployeeClient;
 import com.opencsv.exceptions.CsvException;
 import org.springframework.stereotype.Service;
 
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.Reader;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class EmployeeService {
 
-    private EmployeeRepository employeeRepository;
+    private final EmployeeRepository employeeRepository;
+    private final EmployeeClient employeeClient;
 
-    public EmployeeService(EmployeeRepository employeeRepository) {
+    private final EmployeeMapper employeeMapper;
+    private final CsvDataProvider csvDataProvider;
+
+
+    public EmployeeService(EmployeeRepository employeeRepository, EmployeeClient employeeClient,
+                           EmployeeMapper employeeMapper, CsvDataProvider csvDataProvider) {
         this.employeeRepository = employeeRepository;
+        this.employeeClient = employeeClient;
+        this.employeeMapper = employeeMapper;
+        this.csvDataProvider = csvDataProvider;
     }
 
-    public void saveEmployees(String fileName) throws IOException, CsvException {
-        Reader reader = new FileReader(fileName);
-        CSVReader csvReader = new CSVReaderBuilder(reader).withSkipLines(1).build();
-        List<String[]> rows = csvReader.readAll();
-        for (String[] row : rows) {
-            Employee employee = new Employee();
-            employee.setFirstName(row[0]);
-            employee.setLastName(row[1]);
-            employee.setEmail(row[2]);
-            employee.setPhone(row[3]);
-            employeeRepository.save(employee);
+    public void saveEmployeesCsv(String filePath) throws IOException {
+        List<EmployeeCsvDto> data = csvDataProvider.getData(filePath);
+        for (EmployeeCsvDto employeeCsvDto: data) {
+            employeeRepository.save(employeeMapper.toEmployee(employeeCsvDto));
         }
+    }
 
+    public void saveEmployeesRest(String endpoint) {
+        ArrayList<EmployeeRest> employeeRests = employeeClient.fetchEmployees(endpoint);
+        for (EmployeeRest employeeRest: employeeRests) {
+            employeeRepository.save(employeeMapper.toEmployee(employeeRest));
+        }
     }
 }
